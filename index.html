@@ -7,12 +7,12 @@
 <title>PPLKS — Membership Application 入会申请</title>
 <style>
   :root{
-    --bg:#f5f6f8; --card:#ffffff; --ink:#14181f; --muted:#5b6673;
-    --line:#e2e6ea; --accent:#0f7b6c;
+    --bg:#f5f6f8; --card:#ffffff; --ink:#241F21; --muted:#5b6673;
+    --line:#e2e6ea; --accent:#C8102E;
   }
   @media (prefers-color-scheme: dark){
     :root{ --bg:#0f1216; --card:#171c22; --ink:#eef1f4; --muted:#98a3b0;
-           --line:#242b33; --accent:#2aa694; }
+           --line:#242b33; --accent:#FF6B7D; }
   }
   *{box-sizing:border-box}
   body{
@@ -25,17 +25,15 @@
     border-radius:16px; padding:32px 26px; text-align:center;
     box-shadow:0 1px 3px rgba(0,0,0,.06);
   }
-  .mark{
-    width:56px; height:56px; margin:0 auto 20px; border-radius:14px;
-    background:var(--accent); color:#fff; display:flex; align-items:center;
-    justify-content:center; font-size:26px; font-weight:700; letter-spacing:-1px;
-  }
+  .mark{ width:150px; margin:0 auto 18px; background:#fff; border-radius:12px;
+    padding:10px 12px; display:block; }
+  .mark img{ display:block; width:100%; height:auto; }
   h1{ font-size:17px; line-height:1.4; margin:0 0 6px; font-weight:700; }
   .cn{ font-size:19px; margin:0 0 22px; font-weight:600; color:var(--ink); }
   .divider{ height:1px; background:var(--line); margin:22px 0; }
   .status{
     display:inline-block; padding:6px 14px; border-radius:999px; line-height:1;
-    background:rgba(15,123,108,.12); color:var(--accent);
+    background:rgba(200,16,46,.10); color:var(--accent);
     font-size:13px; font-weight:600; margin-bottom:16px;
   }
   p{ font-size:14px; line-height:1.65; color:var(--muted); margin:0 0 10px; }
@@ -44,7 +42,7 @@
 </head>
 <body>
   <main class="card">
-    <div class="mark">P</div>
+    <div class="mark"><img alt="PPLKS" src="data:image/png;base64,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"></div>
 
     <h1>PERSATUAN PEMILIK LORI<br>KUCHING SAMARAHAN (PPLKS)</h1>
     <p class="cn">古晋三马拉汉罗里公会</p>
