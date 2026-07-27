@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>PPLKS — Membership Application 入会申请</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --card:#ffffff; --ink:#14181f; --muted:#5b6673;
+    --line:#e2e6ea; --accent:#0f7b6c;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0f1216; --card:#171c22; --ink:#eef1f4; --muted:#98a3b0;
+           --line:#242b33; --accent:#2aa694; }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+    padding:24px; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans SC","Microsoft YaHei",sans-serif;
+  }
+  .card{
+    width:100%; max-width:420px; background:var(--card); border:1px solid var(--line);
+    border-radius:16px; padding:32px 26px; text-align:center;
+    box-shadow:0 1px 3px rgba(0,0,0,.06);
+  }
+  .mark{
+    width:56px; height:56px; margin:0 auto 20px; border-radius:14px;
+    background:var(--accent); color:#fff; display:flex; align-items:center;
+    justify-content:center; font-size:26px; font-weight:700; letter-spacing:-1px;
+  }
+  h1{ font-size:17px; line-height:1.4; margin:0 0 6px; font-weight:700; }
+  .cn{ font-size:19px; margin:0 0 22px; font-weight:600; color:var(--ink); }
+  .divider{ height:1px; background:var(--line); margin:22px 0; }
+  .status{
+    display:inline-block; padding:6px 14px; border-radius:999px; line-height:1;
+    background:rgba(15,123,108,.12); color:var(--accent);
+    font-size:13px; font-weight:600; margin-bottom:16px;
+  }
+  p{ font-size:14px; line-height:1.65; color:var(--muted); margin:0 0 10px; }
+  .foot{ font-size:12px; color:var(--muted); margin-top:24px; }
+</style>
+</head>
+<body>
+  <main class="card">
+    <div class="mark">P</div>
+
+    <h1>PERSATUAN PEMILIK LORI<br>KUCHING SAMARAHAN (PPLKS)</h1>
+    <p class="cn">古晋三马拉汉罗里公会</p>
+
+    <div class="divider"></div>
+
+    <span class="status">Coming soon · 即将推出</span>
+
+    <p><strong>Online Membership Application</strong><br>网上入会申请</p>
+    <p>The online application form is being prepared.<br>网上入会表格正在筹备中。</p>
+
+    <p class="foot">Site under construction · 网站建设中</p>
+  </main>
+</body>
+</html>
