@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="Online membership application — Persatuan Pemilik Lori Kuching Samarahan (PPLKS)">
+<title>PPLKS Membership Application 入会申请</title>
+<style>
+:root{
+  --bg:#eef0f3; --card:#fff; --ink:#14181f; --muted:#5b6673; --line:#e2e6ea;
+  --accent:#0f7b6c; --accent-soft:rgba(15,123,108,.10); --on-accent:#fff;
+  --amber:#b45309; --amber-soft:rgba(180,83,9,.10);
+  --red:#c0392b; --red-soft:rgba(192,57,43,.10);
+}
+@media (prefers-color-scheme:dark){
+  :root{ --bg:#0d1014; --card:#171c22; --ink:#eef1f4; --muted:#98a3b0; --line:#252c34;
+         --accent:#2aa694; --accent-soft:rgba(42,166,148,.14); --on-accent:#0d1014;
+         --amber:#d98324; --amber-soft:rgba(217,131,36,.14);
+         --red:#e74c3c; --red-soft:rgba(231,76,60,.14); }
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans SC","Microsoft YaHei",sans-serif;
+  -webkit-text-size-adjust:100%}
+#app{max-width:480px;margin:0 auto;min-height:100%;background:var(--card);
+  display:flex;flex-direction:column;box-shadow:0 0 24px rgba(0,0,0,.06)}
+
+.appbar{padding:13px 16px;border-bottom:1px solid var(--line);flex:0 0 auto;
+  display:flex;align-items:center;gap:11px}
+.appbar .mk{width:66px;flex:0 0 auto;background:#fff;border-radius:7px;padding:3px 5px}
+.appbar .mk img{display:block;width:100%;height:auto}
+.appbar .t1{font-size:11.5px;font-weight:700;letter-spacing:.02em;line-height:1.3}
+.appbar .t2{font-size:11px;color:var(--muted);margin-top:1px}
+
+.steps{display:flex;gap:5px;padding:11px 16px 0;flex:0 0 auto}
+.steps i{flex:1;height:3px;border-radius:2px;background:var(--line);transition:background .18s}
+.steps i.on{background:var(--accent)}
+.stepno{font-size:11px;color:var(--muted);padding:7px 16px 0;flex:0 0 auto}
+
+.scroll{flex:1 1 auto;overflow-y:auto;padding:14px 16px 20px;-webkit-overflow-scrolling:touch}
+.sec-h{display:flex;align-items:baseline;gap:8px;margin:0 0 12px}
+.sec-h b{font-size:15px}
+.sec-h span{font-size:12px;color:var(--muted)}
+
+.f{margin-bottom:12px}
+.f label{display:block;font-size:11.5px;color:var(--muted);margin-bottom:4px;line-height:1.35}
+.f label i{font-style:normal;color:var(--ink);font-weight:600}
+.f input,.f select,.f textarea{
+  width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;
+  background:var(--bg);color:var(--ink);font-size:16px;font-family:inherit}
+.f textarea{min-height:62px;resize:vertical}
+.f input:focus,.f select:focus,.f textarea:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
+.f input[readonly]{opacity:.75}
+.f.bad input,.f.bad select,.f.bad textarea,.f.bad .sig{border-color:var(--red)}
+.err{display:none;font-size:11.5px;color:var(--red);margin-top:4px;line-height:1.4}
+.f.bad .err{display:block}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.req{color:var(--red)}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.pick button{padding:15px 8px;border:1.5px solid var(--line);border-radius:11px;background:var(--bg);
+  color:var(--ink);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;line-height:1.35}
+.pick button small{display:block;font-weight:400;font-size:11.5px;color:var(--muted);margin-top:3px}
+.pick button.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.pick button.on small{color:var(--accent)}
+.pick button:disabled{opacity:.4;cursor:not-allowed}
+
+.note{background:var(--amber-soft);color:var(--amber);border-radius:9px;padding:10px 12px;
+  font-size:12px;line-height:1.55;margin-bottom:14px}
+
+.sig{border:1px dashed var(--line);border-radius:9px;background:var(--bg);position:relative}
+.sig canvas{display:block;width:100%;height:130px;touch-action:none;border-radius:9px}
+.sig .hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:var(--muted);pointer-events:none}
+.sig .clr{position:absolute;right:7px;top:7px;font-size:11.5px;border:1px solid var(--line);
+  background:var(--card);color:var(--muted);border-radius:6px;padding:4px 9px;cursor:pointer;font-family:inherit}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:12px;color:var(--muted);
+  line-height:1.55;margin-top:12px}
+.consent input{margin-top:2px;flex:0 0 auto;width:17px;height:17px;accent-color:var(--accent)}
+
+/* review */
+.rv{border:1px solid var(--line);border-radius:11px;margin-bottom:11px;overflow:hidden}
+.rv h4{margin:0;padding:10px 12px;background:var(--bg);font-size:12px;
+  display:flex;justify-content:space-between;align-items:center}
+.rv h4 button{border:0;background:none;color:var(--accent);font-size:11.5px;font-weight:600;
+  font-family:inherit;cursor:pointer;padding:0}
+.rv dl{margin:0;padding:10px 12px}
+.rv .r{display:flex;gap:10px;font-size:12px;padding:4px 0}
+.rv .r dt{width:132px;flex:0 0 auto;color:var(--muted)}
+.rv .r dd{margin:0;font-weight:600;word-break:break-word}
+
+.feebar{flex:0 0 auto;border-top:1px solid var(--line);background:var(--card);
+  padding:11px 16px calc(13px + env(safe-area-inset-bottom))}
+.feeline{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:3px}
+.feetot{display:flex;justify-content:space-between;font-size:15px;font-weight:700;
+  padding-top:7px;margin-top:6px;border-top:1px dashed var(--line)}
+.btn{width:100%;padding:13px;border:0;border-radius:10px;background:var(--accent);
+  color:var(--on-accent);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer}
+.btn:disabled{opacity:.55;cursor:progress}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.navrow{display:grid;grid-template-columns:1fr 2fr;gap:9px;margin-top:10px}
+
+.done{padding:44px 24px;text-align:center;flex:1 1 auto;display:flex;
+  flex-direction:column;align-items:center;justify-content:center}
+.done .tick{width:62px;height:62px;border-radius:50%;background:var(--accent-soft);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;font-size:31px;margin-bottom:18px}
+.done h2{font-size:18px;margin:0 0 4px}
+.done .cn{font-size:15px;color:var(--muted);margin:0 0 18px}
+.done p{font-size:13px;line-height:1.65;color:var(--muted);margin:0 0 12px;max-width:330px}
+.done .ref{font-size:13px;font-weight:700;background:var(--bg);border:1px solid var(--line);
+  border-radius:9px;padding:10px 16px;margin:6px 0 16px}
+.banner{background:var(--amber-soft);color:var(--amber);font-size:11.5px;
+  padding:8px 16px;text-align:center;line-height:1.45;flex:0 0 auto}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ============================================================================
+   PPLKS Membership Application — production form (Variant B: step wizard)
+   Front-end only. Posts to the Apps Script /exec endpoint below.
+   ---------------------------------------------------------------------------
+   SET THIS after the Apps Script web app is deployed. While it is empty the
+   form runs in DEMO mode: it validates fully and shows the confirmation
+   screen, but sends nothing.
+   ============================================================================ */
+var LOGO = 'data:image/png;base64,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';
+
+var CONFIG = {
+  ENDPOINT : 'https://script.google.com/macros/s/AKfycbwSK8UZGuVZ2Zqp_xnN7qkbXgNehVtarbLvY_AvnzNBozGqlLcyws3QNCr6DOC2JuZu/exec',
+  ORG_EN   : 'PERSATUAN PEMILIK LORI KUCHING SAMARAHAN (PPLKS)',
+  ORG_CN   : '古晋三马拉汉罗里公会',
+  FEES     : { admin:50, indAnnual:150, coAnnual:200, coLife:500 }
+};
+
+/* ---- reference data ------------------------------------------------------ */
+var NATION = ['Malaysia','Indonesia','Other 其他'];
+var RACE   = ['Chinese 华','Malay 巫','Iban 伊班','Bidayuh 比达友','Indian 印','Other 其他'];
+
+function f(k,en,cn,type,extra){
+  var o={k:k,en:en,cn:cn,type:type||'text'};
+  if(extra) for(var p in extra) o[p]=extra[p];
+  return o;
+}
+
+var SECTIONS = [
+  { id:'type', en:'Membership Type', cn:'会员类别', custom:'type' },
+
+  { id:'company', en:'Company Details', cn:'商号资料', only:'company', fields:[
+    f('coName','Company Name','商号名称','text',{ph:'e.g. SYARIKAT PENGANGKUTAN ABC SDN BHD',req:1}),
+    f('coReg','Company Registration No.','商号注册号','text',{ph:'SSM no.',req:1}),
+    f('coAddr','Company Address','公司地址','textarea',{req:1}),
+    f('coTel','Tel / Fax','公司电话 / 传真','tel',{ph:'082-000 000',req:1,rule:'tel'}),
+    f('coEmail','Email','电邮','email',{req:1,rule:'email',hint:'The official receipt will be sent to this address. 正式收据将寄至此电邮。'})
+  ]},
+
+  { id:'contact', en:'Contact', cn:'联络资料', only:'individual', fields:[
+    f('inTel','Mobile No.','手机号码','tel',{ph:'01X-000 0000',req:1,rule:'tel'}),
+    f('inEmail','Email','电邮','email',{req:1,rule:'email',hint:'The official receipt will be sent to this address. 正式收据将寄至此电邮。'})
+  ]},
+
+  { id:'applicant', en:'Applicant Details', cn:'申请人资料', fields:[
+    f('apName','Applicant Name','申请人姓名','text',{req:1}),
+    f('apIC','I.C. No.','登记号码','text',{ph:'000000-00-0000',req:1,rule:'ic',half:1}),
+    f('apDob','Date of Birth','出生日期','date',{req:1,rule:'dob',half:1}),
+    f('apAge','Age','年龄','text',{ro:1,ph:'—',half:1}),
+    f('apPob','Place of Birth','出生地点','text',{half:1}),
+    f('apOcc','Occupation','经营业务','text',{req:1}),
+    f('apNat','Nationality','国籍','select',{opts:NATION,req:1,half:1}),
+    f('apRace','Race','种族','select',{opts:RACE,half:1}),
+    f('apAddr','Home Address','住家地址','textarea',{req:1}),
+    f('apPermit','Permit No.','执照号码','text',{ph:'Lorry permit 罗里执照'})
+  ]},
+
+  { id:'ar', en:'Authorized Representative', cn:'授权代表', only:'company',
+    note:'A company must appoint one authorized representative. If the representative resigns, the company may reappoint. 公司须委任一名授权代表；若代表离职，公司可另行委任。', fields:[
+    f('arName','Representative Name','授权代表姓名','text',{req:1}),
+    f('arIC','I.C. No.','登记号码','text',{ph:'000000-00-0000',req:1,rule:'ic',half:1}),
+    f('arDob','Date of Birth','出生日期','date',{req:1,rule:'dob',half:1}),
+    f('arAge','Age','年龄','text',{ro:1,ph:'—',half:1}),
+    f('arPob','Place of Birth','出生地点','text',{half:1}),
+    f('arOcc','Occupation','经营业务','text'),
+    f('arNat','Nationality','国籍','select',{opts:NATION,half:1}),
+    f('arRace','Race','种族','select',{opts:RACE,half:1}),
+    f('arAddr','Home Address','住家地址','textarea'),
+    f('arTel','Tel','电话','tel',{req:1,rule:'tel',half:1}),
+    f('arEmail','Email','电邮','email',{rule:'email',half:1})
+  ]},
+
+  { id:'proposer', en:'Proposer', cn:'介绍人',
+    note:'The proposer must be an existing PPLKS member. 介绍人须为本会会员。', fields:[
+    f('prName','Proposer Name','介绍人姓名','text',{req:1}),
+    f('prNo','Member No.','会员号码','text',{half:1}),
+    f('prTel','Tel','电话','tel',{req:1,rule:'tel',half:1})
+  ]},
+
+  { id:'declare',  en:'Declaration & Signature', cn:'声明与签名', custom:'declare' },
+  { id:'review',   en:'Review & Submit',        cn:'检查并提交',  custom:'review' }
+];
+
+/* ---- state -------------------------------------------------------------- */
+var S = { type:'individual', plan:'annual', step:0, data:{}, sig:'', consent:false,
+          bad:{}, sending:false, sent:null, hp:'' };
+
+function secs(){
+  return SECTIONS.filter(function(s){ return !s.only || s.only === S.type; });
+}
+function secById(id){
+  for(var i=0;i<SECTIONS.length;i++) if(SECTIONS[i].id===id) return SECTIONS[i];
+  return null;
+}
+function esc(v){
+  return String(v==null?'':v).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+/* ---- validation --------------------------------------------------------- */
+var RULES = {
+  email: { test:function(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); },
+           msg:'Enter a valid email address 请输入有效电邮' },
+  tel:   { test:function(v){ return (v.replace(/\D/g,'').length >= 9); },
+           msg:'Enter a valid phone number 请输入有效电话号码' },
+  ic:    { test:function(v){ return /^\d{6}-?\d{2}-?\d{4}$/.test(v.replace(/\s/g,'')); },
+           msg:'Format: 000000-00-0000 格式不符' },
+  dob:   { test:function(v){ var d=new Date(v); return !isNaN(d) && d < new Date(); },
+           msg:'Date of birth must be in the past 出生日期不正确' }
+};
+
+function validateStep(){
+  var s = secs()[S.step];
+  S.bad = {};
+
+  if(s.custom === 'declare'){
+    if(!S.sig)     S.bad.__sig = 'Signature is required 请签名';
+    if(!S.consent) S.bad.__consent = 'Please tick to consent 请勾选同意';
+  } else if(s.fields){
+    s.fields.forEach(function(fl){
+      var v = (S.data[fl.k] || '').trim();
+      if(fl.ro) return;
+      if(fl.req && !v){ S.bad[fl.k] = 'Required 必填'; return; }
+      if(v && fl.rule && !RULES[fl.rule].test(v)) S.bad[fl.k] = RULES[fl.rule].msg;
+    });
+  }
+  return Object.keys(S.bad).length === 0;
+}
+
+function ageFrom(dob){
+  if(!dob) return '';
+  var d = new Date(dob); if(isNaN(d)) return '';
+  var t = new Date(), a = t.getFullYear() - d.getFullYear();
+  var m = t.getMonth() - d.getMonth();
+  if(m < 0 || (m === 0 && t.getDate() < d.getDate())) a--;
+  return (a >= 0 && a < 130) ? String(a) : '';
+}
+
+/* ---- fees --------------------------------------------------------------- */
+function fees(){
+  var F = CONFIG.FEES;
+  var sub = S.type === 'company' ? (S.plan === 'life' ? F.coLife : F.coAnnual) : F.indAnnual;
+  var label = S.type === 'company'
+    ? (S.plan === 'life' ? 'Life membership 永久会员' : 'Company annual 公司年费')
+    : 'Individual annual 个人年费';
+  return { admin:F.admin, sub:sub, label:label, total:F.admin + sub };
+}
+
+/* ---- markup ------------------------------------------------------------- */
+function fieldHtml(fl){
+  var bad = S.bad[fl.k];
+  var v   = S.data[fl.k] || '';
+  var lab = '<label><i>' + esc(fl.en) + '</i> ' + esc(fl.cn) + (fl.req ? ' <b class="req">*</b>' : '') + '</label>';
+  var body;
+  if(fl.type === 'select'){
+    body = '<select data-k="' + fl.k + '"><option value="">— pilih / 请选择 —</option>' +
+      fl.opts.map(function(o){
+        return '<option' + (v === o ? ' selected' : '') + '>' + esc(o) + '</option>';
+      }).join('') + '</select>';
+  } else if(fl.type === 'textarea'){
+    body = '<textarea data-k="' + fl.k + '" placeholder="' + esc(fl.ph||'') + '">' + esc(v) + '</textarea>';
+  } else {
+    body = '<input data-k="' + fl.k + '" type="' + fl.type + '" value="' + esc(v) +
+           '" placeholder="' + esc(fl.ph||'') + '"' + (fl.ro ? ' readonly tabindex="-1"' : '') +
+           (fl.type === 'tel' ? ' inputmode="tel"' : '') + '>';
+  }
+  return '<div class="f' + (bad ? ' bad' : '') + '">' + lab + body +
+         (fl.hint ? '<label style="margin:5px 0 0">' + esc(fl.hint) + '</label>' : '') +
+         '<div class="err">' + esc(bad || '') + '</div></div>';
+}
+
+function fieldsHtml(fields){
+  var out = '', i = 0;
+  while(i < fields.length){
+    if(fields[i].half && fields[i+1] && fields[i+1].half){
+      out += '<div class="row2">' + fieldHtml(fields[i]) + fieldHtml(fields[i+1]) + '</div>';
+      i += 2;
+    } else { out += fieldHtml(fields[i]); i += 1; }
+  }
+  return out;
+}
+
+function typeHtml(){
+  return '' +
+  '<div class="pick">' +
+    '<button type="button" data-t="individual" class="' + (S.type==='individual'?'on':'') + '">Individual<small>个人</small></button>' +
+    '<button type="button" data-t="company" class="' + (S.type==='company'?'on':'') + '">Company<small>公司</small></button>' +
+  '</div>' +
+  '<label style="font-size:11.5px;color:var(--muted);margin-bottom:6px;display:block">Subscription 会费</label>' +
+  '<div class="pick">' +
+    '<button type="button" data-p="annual" class="' + (S.plan==='annual'?'on':'') + '">Annual<small>' +
+      (S.type==='company' ? 'RM 200 / year 年' : 'RM 150 / year 年') + '</small></button>' +
+    '<button type="button" data-p="life" class="' + (S.plan==='life'?'on':'') + '"' +
+      (S.type==='company' ? '' : ' disabled') + '>Life<small>' +
+      (S.type==='company' ? 'RM 500 一次过' : 'Company only 仅限公司') + '</small></button>' +
+  '</div>' +
+  '<div class="note">A one-time administration fee of RM 50 applies to all new members. 所有新会员须缴付一次性入会报名费 RM 50。</div>';
+}
+
+function declareHtml(){
+  return '' +
+  '<div class="note">I declare that the particulars given are true and correct, and agree to abide by the rules and regulations of the Association and the resolutions of the management committee. 兹声明以上各项填报全属确实，并愿遵守本会一切章程之规定与理事会之决定。</div>' +
+  '<div class="f' + (S.bad.__sig ? ' bad' : '') + '">' +
+    '<label><i>Signature of Applicant</i> 申请人签名 <b class="req">*</b></label>' +
+    '<div class="sig"><canvas></canvas>' +
+      '<div class="hint"' + (S.sig ? ' style="display:none"' : '') + '>Sign here 在此签名</div>' +
+      '<button class="clr" type="button">Clear 清除</button></div>' +
+    '<div class="err">' + esc(S.bad.__sig || '') + '</div>' +
+  '</div>' +
+  '<label class="consent"><input type="checkbox" id="cs"' + (S.consent ? ' checked' : '') + '>' +
+    '<span>I consent to PPLKS collecting, storing and processing the personal data provided above for the purpose of membership registration and administration, in accordance with the Personal Data Protection Act 2010. 本人同意本会依据2010年个人资料保护法令，为会员注册及管理之目的收集、储存及处理上述个人资料。' +
+    (S.bad.__consent ? '<b class="req"> — ' + esc(S.bad.__consent) + '</b>' : '') + '</span></label>';
+}
+
+function reviewHtml(){
+  var out = '';
+  var x = fees();
+
+  out += '<div class="rv"><h4><span>Membership Type 会员类别</span>' +
+         '<button type="button" data-go="type">Edit 修改</button></h4><dl>' +
+         '<div class="r"><dt>Category 类别</dt><dd>' +
+           (S.type==='company' ? 'Company 公司' : 'Individual 个人') + '</dd></div>' +
+         '<div class="r"><dt>Subscription 会费</dt><dd>' +
+           (S.plan==='life' ? 'Life 永久会员' : 'Annual 年费') + '</dd></div></dl></div>';
+
+  secs().forEach(function(s){
+    if(!s.fields) return;
+    var rows = s.fields.filter(function(fl){ return (S.data[fl.k]||'').trim(); })
+      .map(function(fl){
+        return '<div class="r"><dt>' + esc(fl.en) + '</dt><dd>' + esc(S.data[fl.k]) + '</dd></div>';
+      }).join('');
+    if(!rows) return;
+    out += '<div class="rv"><h4><span>' + esc(s.en) + ' ' + esc(s.cn) + '</span>' +
+           '<button type="button" data-go="' + s.id + '">Edit 修改</button></h4><dl>' + rows + '</dl></div>';
+  });
+
+  out += '<div class="rv"><h4><span>Declaration 声明</span>' +
+         '<button type="button" data-go="declare">Edit 修改</button></h4><dl>' +
+         '<div class="r"><dt>Signature 签名</dt><dd>' + (S.sig ? 'Signed 已签名 ✓' : '—') + '</dd></div>' +
+         '<div class="r"><dt>PDPA consent 同意</dt><dd>' + (S.consent ? 'Given 已同意 ✓' : '—') + '</dd></div></dl></div>';
+
+  out += '<div class="note">After you submit, the committee will review your application. Once it is approved and payment of <b>RM ' +
+         x.total.toFixed(2) + '</b> is confirmed, your official receipt will be emailed to you. 提交后由理事会审核；审核通过并确认付款后，正式收据将以电邮寄出。</div>';
+  return out;
+}
+
+function sectionBody(s){
+  if(s.custom === 'type')    return typeHtml();
+  if(s.custom === 'declare') return declareHtml();
+  if(s.custom === 'review')  return reviewHtml();
+  return (s.note ? '<div class="note">' + esc(s.note) + '</div>' : '') + fieldsHtml(s.fields);
+}
+
+function feeHtml(btns){
+  var x = fees();
+  return '<div class="feeline"><span>Administration fee 入会报名费</span><span>RM ' + x.admin.toFixed(2) + '</span></div>' +
+         '<div class="feeline"><span>' + x.label + '</span><span>RM ' + x.sub.toFixed(2) + '</span></div>' +
+         '<div class="feetot"><span>Total 总额</span><span>RM ' + x.total.toFixed(2) + '</span></div>' + btns;
+}
+
+/* ---- render ------------------------------------------------------------- */
+function render(){
+  var app = document.getElementById('app');
+
+  var bar = '<div class="appbar"><div class="mk"><img alt="PPLKS" src="' + LOGO + '"></div><div>' +
+            '<div class="t1">MEMBERSHIP APPLICATION 入会申请</div>' +
+            '<div class="t2">' + esc(CONFIG.ORG_CN) + '</div></div></div>';
+
+  if(S.sent){
+    app.innerHTML = bar +
+      '<div class="done"><div class="tick">✓</div>' +
+      '<h2>Application submitted</h2><p class="cn">申请已提交</p>' +
+      '<div class="ref">' + esc(S.sent) + '</div>' +
+      '<p>Please keep this reference number. The committee will review your application and you will be contacted by email. 请保留此参考编号。理事会将审核您的申请，并以电邮通知您。</p>' +
+      '<p>Once approved and payment is confirmed, your official receipt will be emailed to you. 审核通过并确认付款后，正式收据将以电邮寄出。</p>' +
+      '</div>';
+    return;
+  }
+
+  var list = secs();
+  if(S.step > list.length - 1) S.step = list.length - 1;
+  if(S.step < 0) S.step = 0;
+  var s = list[S.step], last = S.step === list.length - 1;
+
+  var demo = CONFIG.ENDPOINT ? '' :
+    '<div class="banner">DEMO — not connected to the server yet. Nothing will be saved. 示范模式，资料不会被储存。</div>';
+
+  app.innerHTML = bar + demo +
+    '<div class="steps">' + list.map(function(_,i){
+        return '<i class="' + (i <= S.step ? 'on' : '') + '"></i>'; }).join('') + '</div>' +
+    '<div class="stepno">Step ' + (S.step+1) + ' of ' + list.length + ' · ' + esc(s.cn) + '</div>' +
+    '<div class="scroll"><div class="sec-h"><b>' + esc(s.en) + '</b><span>' + esc(s.cn) + '</span></div>' +
+      sectionBody(s) +
+      '<div class="hp"><label>Leave this empty</label>' +
+        '<input type="text" id="hp" value="' + esc(S.hp) + '" tabindex="-1" autocomplete="off"></div>' +
+    '</div>' +
+    '<div class="feebar">' + feeHtml('<div class="navrow">' +
+        '<button type="button" class="btn ghost" data-nav="-1"' + (S.step===0?' disabled':'') + '>Back 返回</button>' +
+        '<button type="button" class="btn" data-nav="1"' + (S.sending?' disabled':'') + '>' +
+          (S.sending ? 'Sending… 提交中' : (last ? 'Submit Application 提交申请' : 'Next 下一步')) +
+        '</button></div>') + '</div>';
+
+  wire();
+}
+
+/* ---- interactions ------------------------------------------------------- */
+function wire(){
+  var app = document.getElementById('app');
+
+  app.querySelectorAll('[data-k]').forEach(function(el){
+    el.oninput = el.onchange = function(){
+      var k = el.getAttribute('data-k');
+      S.data[k] = el.value;
+      if(k === 'apDob') S.data.apAge = ageFrom(el.value);
+      if(k === 'arDob') S.data.arAge = ageFrom(el.value);
+      if(k === 'apDob' || k === 'arDob'){
+        var t = app.querySelector('[data-k="' + (k === 'apDob' ? 'apAge' : 'arAge') + '"]');
+        if(t) t.value = S.data[k === 'apDob' ? 'apAge' : 'arAge'] || '';
+      }
+      if(S.bad[k]){ delete S.bad[k]; el.closest('.f').classList.remove('bad'); }
+    };
+  });
+
+  app.querySelectorAll('[data-t]').forEach(function(b){
+    b.onclick = function(){
+      S.type = b.getAttribute('data-t');
+      if(S.type === 'individual') S.plan = 'annual';
+      render();
+    };
+  });
+  app.querySelectorAll('[data-p]').forEach(function(b){
+    b.onclick = function(){ if(!b.disabled){ S.plan = b.getAttribute('data-p'); render(); } };
+  });
+  app.querySelectorAll('[data-go]').forEach(function(b){
+    b.onclick = function(){
+      var id = b.getAttribute('data-go'), list = secs();
+      for(var i=0;i<list.length;i++) if(list[i].id === id){ S.step = i; break; }
+      render();
+    };
+  });
+
+  var cs = document.getElementById('cs');
+  if(cs) cs.onchange = function(){ S.consent = cs.checked; };
+  var hp = document.getElementById('hp');
+  if(hp) hp.oninput = function(){ S.hp = hp.value; };
+
+  var sig = app.querySelector('.sig');
+  if(sig) signature(sig);
+
+  app.querySelectorAll('[data-nav]').forEach(function(b){
+    b.onclick = function(){
+      if(b.disabled) return;
+      var dir = parseInt(b.getAttribute('data-nav'), 10);
+      if(dir < 0){ S.step -= 1; S.bad = {}; render(); scrollTop(); return; }
+      if(!validateStep()){ render(); focusBad(); return; }
+      if(S.step === secs().length - 1){ submit(); return; }
+      S.step += 1; render(); scrollTop();
+    };
+  });
+}
+
+function scrollTop(){
+  var sc = document.querySelector('.scroll');
+  if(sc) sc.scrollTop = 0;
+}
+function focusBad(){
+  var el = document.querySelector('.f.bad');
+  if(el && el.scrollIntoView) el.scrollIntoView({block:'center'});
+}
+
+function signature(box){
+  var c = box.querySelector('canvas'), hint = box.querySelector('.hint');
+  var rect = c.getBoundingClientRect();
+  var dpr = window.devicePixelRatio || 1;
+  c.width = Math.max(1, Math.round(rect.width * dpr));
+  c.height = Math.max(1, Math.round(rect.height * dpr));
+  var g = c.getContext('2d');
+  g.scale(dpr, dpr);
+  g.lineWidth = 2; g.lineCap = 'round'; g.lineJoin = 'round';
+  g.strokeStyle = getComputedStyle(document.body).color;
+
+  if(S.sig){
+    var img = new Image();
+    img.onload = function(){ g.drawImage(img, 0, 0, rect.width, rect.height); };
+    img.src = S.sig;
+  }
+
+  var drawing = false;
+  function pt(e){ var b = c.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; }
+  c.addEventListener('pointerdown', function(e){
+    drawing = true; hint.style.display = 'none';
+    c.setPointerCapture(e.pointerId);
+    var p = pt(e); g.beginPath(); g.moveTo(p[0], p[1]);
+  });
+  c.addEventListener('pointermove', function(e){
+    if(!drawing) return; var p = pt(e); g.lineTo(p[0], p[1]); g.stroke();
+  });
+  c.addEventListener('pointerup', function(){
+    if(!drawing) return;
+    drawing = false;
+    S.sig = c.toDataURL('image/png');
+    if(S.bad.__sig){ delete S.bad.__sig; box.closest('.f').classList.remove('bad'); }
+  });
+  box.querySelector('.clr').onclick = function(){
+    g.clearRect(0, 0, c.width, c.height);
+    S.sig = ''; hint.style.display = 'flex';
+  };
+}
+
+/* ---- submit ------------------------------------------------------------- */
+function payload(){
+  var x = fees();
+  var d = {};
+  secs().forEach(function(s){
+    if(!s.fields) return;
+    s.fields.forEach(function(fl){ d[fl.k] = (S.data[fl.k] || '').trim(); });
+  });
+  return {
+    action        : 'submitApplication',
+    memberType    : S.type.toUpperCase(),
+    planType      : S.plan.toUpperCase(),
+    adminFee      : x.admin,
+    subscriptionFee: x.sub,
+    totalDue      : x.total,
+    fields        : d,
+    signaturePng  : S.sig,
+    consentPdpa   : S.consent,
+    hp            : S.hp,
+    clientTime    : new Date().toISOString()
+  };
+}
+
+function submit(){
+  if(S.sending) return;
+  S.sending = true; render();
+
+  if(!CONFIG.ENDPOINT){                       // demo mode
+    setTimeout(function(){
+      S.sending = false;
+      S.sent = 'DEMO-' + String(Math.floor(Math.random() * 90000) + 10000);
+      render();
+    }, 600);
+    return;
+  }
+
+  fetch(CONFIG.ENDPOINT, {
+    method  : 'POST',
+    headers : { 'Content-Type': 'text/plain;charset=utf-8' },  // simple request: no CORS preflight
+    body    : JSON.stringify(payload())
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    S.sending = false;
+    if(res && res.ok){ S.sent = res.appId || 'RECEIVED'; }
+    else { alert('Submission failed 提交失败: ' + ((res && res.error) || 'unknown')); }
+    render();
+  })
+  .catch(function(err){
+    S.sending = false;
+    alert('Network error 网络错误. Please try again. 请再试一次。\n' + err);
+    render();
+  });
+}
+
+render();
+</script>
+</body>
+</html>
