@@ -50,6 +50,8 @@ body{margin:0;background:var(--bg);color:var(--ink);
   width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;
   background:var(--bg);color:var(--ink);font-size:16px;font-family:inherit}
 .f textarea{min-height:62px;resize:vertical}
+.f input.up,.f textarea.up{text-transform:uppercase}
+.f input.up::placeholder,.f textarea.up::placeholder{text-transform:none}
 .f input:focus,.f select:focus,.f textarea:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
 .f input[readonly]{opacity:.75}
 .f.bad input,.f.bad select,.f.bad textarea,.f.bad .sig{border-color:var(--red)}
@@ -248,6 +250,41 @@ function validateStep(){
   return Object.keys(S.bad).length === 0;
 }
 
+/* Uppercase applies to free-text fields only. Email is deliberately excluded:
+   the local-part of an address is case-sensitive per RFC 5321, and an
+   uppercased address reads badly on the receipt. Dates, selects and the
+   read-only Age field are untouched. CJK is unaffected by toUpperCase(). */
+function isUpperField(fl){
+  return !fl.ro && (fl.type === 'text' || fl.type === 'textarea');
+}
+
+/* Malaysian I.C. — YYMMDD-PB-###G. The first six digits are the birth date.
+   Century: 20YY unless that lands in the future, in which case 19YY. The extra
+   age<12 guard catches the genuine ambiguity (an IC starting "26" in the year
+   2026 is a centenarian, not a newborn) — nobody that young applies or acts as
+   an authorized representative. Returns '' unless the date is real, so a
+   half-typed IC never writes a wrong DOB. The field stays editable either way. */
+function dobFromIC(ic){
+  var d = String(ic || '').replace(/\D/g, '');
+  if(d.length !== 12) return '';
+  var yy = +d.slice(0,2), mm = +d.slice(2,4), dd = +d.slice(4,6);
+  if(mm < 1 || mm > 12 || dd < 1 || dd > 31) return '';
+
+  function mk(year){
+    var t = new Date(year, mm - 1, dd);
+    // round-trip guards against 31 Feb and friends
+    if(t.getFullYear() !== year || t.getMonth() !== mm - 1 || t.getDate() !== dd) return null;
+    return t;
+  }
+  var now = new Date();
+  var t = mk(2000 + yy);
+  if(!t || t > now || ageFrom(t) < 12) t = mk(1900 + yy);
+  if(!t || t > now) return '';
+
+  var p = function(n){ return (n < 10 ? '0' : '') + n; };
+  return t.getFullYear() + '-' + p(t.getMonth() + 1) + '-' + p(t.getDate());
+}
+
 function ageFrom(dob){
   if(!dob) return '';
   var d = new Date(dob); if(isNaN(d)) return '';
@@ -272,6 +309,7 @@ function fieldHtml(fl){
   var bad = S.bad[fl.k];
   var v   = S.data[fl.k] || '';
   var lab = '<label><i>' + esc(fl.en) + '</i> ' + esc(fl.cn) + (fl.req ? ' <b class="req">*</b>' : '') + '</label>';
+  var up  = isUpperField(fl) ? ' class="up" autocapitalize="characters" spellcheck="false"' : '';
   var body;
   if(fl.type === 'select'){
     body = '<select data-k="' + fl.k + '"><option value="">— pilih / 请选择 —</option>' +
@@ -279,9 +317,9 @@ function fieldHtml(fl){
         return '<option' + (v === o ? ' selected' : '') + '>' + esc(o) + '</option>';
       }).join('') + '</select>';
   } else if(fl.type === 'textarea'){
-    body = '<textarea data-k="' + fl.k + '" placeholder="' + esc(fl.ph||'') + '">' + esc(v) + '</textarea>';
+    body = '<textarea data-k="' + fl.k + '"' + up + ' placeholder="' + esc(fl.ph||'') + '">' + esc(v) + '</textarea>';
   } else {
-    body = '<input data-k="' + fl.k + '" type="' + fl.type + '" value="' + esc(v) +
+    body = '<input data-k="' + fl.k + '"' + up + ' type="' + fl.type + '" value="' + esc(v) +
            '" placeholder="' + esc(fl.ph||'') + '"' + (fl.ro ? ' readonly tabindex="-1"' : '') +
            (fl.type === 'tel' ? ' inputmode="tel"' : '') + '>';
   }
@@ -428,10 +466,47 @@ function render(){
 function wire(){
   var app = document.getElementById('app');
 
+  /* Push a value into a field we are filling on the user's behalf, keeping
+     S.data, the DOM and the error state in step without a full re-render
+     (a re-render here would steal focus mid-typing). */
+  function setField(key, value){
+    S.data[key] = value;
+    var t = app.querySelector('[data-k="' + key + '"]');
+    if(t) t.value = value || '';
+    if(value && S.bad[key]){
+      delete S.bad[key];
+      if(t && t.closest('.f')) t.closest('.f').classList.remove('bad');
+    }
+  }
+
   app.querySelectorAll('[data-k]').forEach(function(el){
     el.oninput = el.onchange = function(){
       var k = el.getAttribute('data-k');
+
+      /* Uppercase in place. The caret is restored because assigning .value
+         moves it to the end, which makes mid-string edits impossible. */
+      if(el.classList.contains('up')){
+        var u = el.value.toUpperCase();
+        if(u !== el.value){
+          var a = el.selectionStart, b = el.selectionEnd;
+          el.value = u;
+          try { el.setSelectionRange(a, b); } catch(e){}
+        }
+      }
+
       S.data[k] = el.value;
+
+      /* I.C. no. drives Date of Birth, which in turn drives Age. */
+      if(k === 'apIC' || k === 'arIC'){
+        var dk  = (k === 'apIC') ? 'apDob' : 'arDob';
+        var ak  = (k === 'apIC') ? 'apAge' : 'arAge';
+        var dob = dobFromIC(el.value);
+        if(dob){                       // '' while the IC is incomplete — never clobber with a guess
+          setField(dk, dob);
+          setField(ak, ageFrom(dob));
+        }
+      }
+
       if(k === 'apDob') S.data.apAge = ageFrom(el.value);
       if(k === 'arDob') S.data.arAge = ageFrom(el.value);
       if(k === 'apDob' || k === 'arDob'){
